@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!--        /* macro tags  */-->
+<style>
+    body{
+        font-family: monospace;
+        /*background-image: url("{{ front_camera_ip  }}/stream");*/
+        /*background-position: center;*/
+        /*background-repeat: no-repeat;*/
+         /*background-color: #cccccc;*/
+    }
+   input{
+    color: transparent;
+    border: 0px;
+    width: 0px;
+     }
+</style>
+
+<!--        /* container  */-->
+<style>
+.item1 { grid-area: header; }
+.item2 { grid-area: left-up; }
+.item22 { grid-area: left-down; }
+.item3 { grid-area: main; }
+.item4 { grid-area: right-up; }
+.item44 { grid-area: right-down; }
+.item_footer_left { grid-area: footer_left; }
+.item_footer_center { grid-area: footer_center; }
+.item_footer_right { grid-area: footer_right; }
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'header header header header header header'
+    'left-up main main main main right-up'
+    'left-up  main main main main right-up'
+    'left-down  main main main main right-down'
+    'left-down  main main main main right-down'
+    'footer_left footer_center footer_center footer_center footer_center footer_right';
+  gap: 10px;
+  /*background-color: #ffffff;*/
+  background-color: transparent;
+  padding: 10px;
+}
+.grid-container > div {
+  /*background-color: rgba(255, 255, 255, 0.8);*/
+    background-color: transparent;
+  text-align: center;
+  align-content: center;
+  /*padding: 20px 0;*/
+  font-size: 30px;
+}
+</style>
+
+<!--        /* game wrapper  */-->
+<style>
+
+
+        .game-wrapper{display: flex;flex-direction: row;align-items: center;gap: 30px;justify-content: center;}
+        .game-wrapper.relative {position: relative;text-align: center;align-content: center;}
+        .joystick-wrapper{text-align: center;display: grid;grid-template-columns: repeat(3, 100px);grid-template-rows: repeat(3, 100px); }
+        .arrow {margin: auto;width: 0;height: 0; border-left: 50px solid transparent;border-right: 50px solid transparent;border-bottom: 50px solid black;cursor: pointer; }
+        .arrow:hover{border-bottom: 50px solid rgb(33, 225, 243);}
+        .joystick-wrapper div:nth-of-type(2){transform: rotate(-90deg);}
+        .joystick-wrapper div:nth-of-type(3){transform: rotate(90deg);}
+        .joystick-wrapper div:nth-of-type(4){transform: rotate(180deg);}
+
+        .joystick-wrapper-mod{text-align: center;display: grid;grid-template-columns: repeat(3, 200px);grid-template-rows: repeat(3, 100px); }
+        .joystick-wrapper-mod div:nth-of-type(2){transform: rotate(-90deg);}
+        .joystick-wrapper-mod div:nth-of-type(3){transform: rotate(90deg);}
+        .joystick-wrapper-mod div:nth-of-type(4){transform: rotate(180deg);}
+        .arrow-mod {margin: auto;width: 0;height: 0; opacity: 0.1; border-left: 70px solid transparent;border-right: 70px solid transparent;border-bottom: 70px solid #f8f5f5;cursor: pointer; }
+        .arrow-mod:hover{border-bottom: 70px solid rgb(148, 216, 222);opacity: 1;}
+
+        .pressed{border-bottom: 50px solid rgb(255, 255, 255);}
+        .pressed:hover{border-bottom: 50px solid rgb(255, 255, 255);}
+        .recenter:hover{opacity:1; color: #94d8de}
+
+</style>
+
+<!--        /* grid-container-item AND grid-item  */-->
+<style>
+    .grid-container-item {display: grid;grid-template-columns: auto auto auto;padding: 10px;}
+    .grid-item {font-size: 30px;text-align: center;}
+</style>
+
+<style>
+    .grid-container-item-central {display: grid;grid-template-columns: auto;padding: 10px;}
+    .grid-item-central {font-size: 30px;text-align: center;}
+</style>
+<!--    /* The switch - the box around the slider */-->
+<style>
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #2196F3;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: white;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #white;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+<style>
+/* New CSS classes for grid and image overlay */
+.image-overlay-container {
+    position: relative;
+    display: inline-block;
+}
+
+.image-overlay-container img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.joystick-wrapper-overlay {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    position: relative;
+}
+.joystick-wrapper-overlay div:nth-of-type(2){transform: rotate(-90deg);}
+.joystick-wrapper-overlay div:nth-of-type(3){transform: rotate(90deg);}
+.joystick-wrapper-overlay div:nth-of-type(4){transform: rotate(180deg);}
+
+.background-image {
+    background-image: url('http://{{ front_camera_ip  }}:81/stream');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+</style>
+
+
+
+</head>
+<body>
+
+<div class="grid-container">
+      <div class="item1" style="font-size: 1em; color: blue;font-style: italic;">
+          <div style="float:right">Connected in {{ap_wifi}} mode to the address {{ip}}</div>
+          <div style="text-align: left;"><a href="/settings">Go to Settings</a></div>
+          <div style="font-size:2em;">Distance:<a id="id_distance"></a>cm</div>
+      </div>
+      <div class="item2" id="dashboard-left">Left - Right
+
+      </div>
+      <div class="item22 grid-container-item"><div class="grid-item"></div>
+          <div class="grid-item">
+              <div class="game-wrapper">
+            <div class="joystick-wrapper">
+                <p></p><div class="" id=""></div>
+                <p></p><div class="arrow" id="motor_left"></div>
+                <p id="motor_stop_mod" class="recenter" style="justify-content: center;display: flex;">CENTER</p>
+                <div class="arrow" id="motor_right"></div>
+                <p></p>
+                <div class="" id=""></div>
+            <p></p></div>
+            </div>
+          </div>
+          <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div> <div class="grid-item"></div>
+      </div>
+        <div class="item3 grid-container-item-central background-image">
+
+            <div class="grid-item-central"></div>
+            <div class="grid-item-central">
+
+                <div class="game-wrapper">
+                    <div class="joystick-wrapper-mod">
+                        <p></p><div class="arrow-mod" id="camera_up"></div>
+                        <p></p><div class="arrow-mod" id="camera_left"></div>
+                        <p id="motor_stop_left" class="recenter" style="justify-content: center; display: flex; opacity:.1">STOP</p>
+                        <div class="arrow-mod" id="camera_right"></div>
+                        <p></p>
+                        <div class="arrow-mod" id="camera_down"></div>
+                        <p></p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="grid-item-central"></div>
+        <!--   <div class="grid-item"></div> -->
+            <!--   <div class="grid-item"></div> -->
+            <!--   <div class="grid-item"></div> -->
+        </div>
+
+
+
+
+      <div class="item4" id="dashboard-right">Motor
+
+      </div>
+      <div class="item44 grid-container-item">
+          <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
+          <div class="grid-item"><div class="game-wrapper">
+            <div class="joystick-wrapper">
+            <p></p>
+            <div class="arrow" id="motor_up"></div>
+            <p></p>
+            <div class="" id="motor_left"></div>
+            <p id="motor_stop" class="recenter" style="justify-content: center;display: flex;">STOP</p>
+            <div class="" id="motor_right"></div>
+            <p></p>
+            <div class="arrow" id="motor_down"></div>
+            <p></p></div>
+            </div></div>
+          <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
+      </div>
+
+
+    <div class="item_footer_left" hidden>
+<!-- -->
+        <i style="font-family: monospace;font-size: .55em; ">front motor</i>
+
+        <label class="switch" >
+          <input type="checkbox" name="front_back" id="front_back_control" value="front">
+          <span class="slider round"></span>
+        </label>
+        <i style="font-family: monospace;font-size: .55em;">back motor</i>
+<!-- -->
+    </div>
+    <div class="item_footer_center">
+        <i style="font-family: monospace;font-size: .55em;">front camera</i>
+
+        <label class="switch">
+          <input type="checkbox" name="front_back" id="front_back_camera" value="front">
+          <span class="slider round"></span>
+        </label>
+        <i style="font-family: monospace;font-size: .55em;">back camera</i>
+
+    </div>
+    <div class="item_footer_right">  </div>
+
+<!-- </form>-->
+</div>
+
+<script>
+
+            arrows = document.querySelectorAll(".arrow");
+            arrows.forEach((arrow) => {
+                          //  arrow.addEventListener('click',eventhandler)
+                            arrow.addEventListener('mousedown', eventhandler)
+                            arrow.addEventListener('mouseup', eventhandler)
+                        })
+
+            arrows_mod = document.querySelectorAll(".arrow-mod");
+            arrows_mod.forEach((arrow) => {
+                          //  arrow.addEventListener('click',eventhandler)
+                            arrow.addEventListener('mousedown', eventhandler)
+                            arrow.addEventListener('mouseup', eventhandler)
+                        })
+
+            recenter = document.querySelectorAll(".recenter");
+            recenter.forEach((recenter) => {
+
+                        recenter.addEventListener('mousedown', eventhandler)
+                        recenter.addEventListener('mouseup', eventhandler)
+                    })
+            function eventhandler(event) {
+                // event.preventDefault();
+
+                console.log("event.type:")
+                console.log(event.type)
+                console.log(event.target.getAttribute('id'))
+
+
+
+                camera_motor = String(event.target.getAttribute('id')).split("_")[0]
+                direction = String(event.target.getAttribute('id')).split("_")[1]
+
+                if (event.type == 'mousedown') {
+
+                    if (camera_motor == 'camera') {
+                        console.log("press mousedown")
+                        console.log("if camera")
+                        console.log("direction " + direction)
+                        submitFormAjaxCamera(direction, document.getElementById("front_back_control").value)
+                    } else if (camera_motor == 'motor') {
+                        // submitFormAjaxMotor(direction);
+                        console.log("press mousedown")
+                        console.log("if camera")
+                        console.log("direction " + direction + "_continue")
+                        submitFormAjaxMotor(direction +"_continue");
+                    } else {
+
+                    }
+                }
+                else if (event.type == 'mouseup') {
+                    debugger
+                    if (camera_motor == 'camera') {
+                    //    no action is required for the camera as the camera motor is a servo
+                    //    and it use step by step
+                        console.log("press mousedown")
+                        console.log("if camera")
+                        console.log("direction " + direction)
+                    } else if (camera_motor == 'motor') {
+                        // submitFormAjaxMotor(direction);
+                        console.log("press mousedown")
+                        console.log("if camera")
+                        console.log("direction " + "stop")
+                        submitFormAjaxMotor("stop");
+                        // submitFormAjaxMotor("stop");
+
+                    } else {
+
+                    }
+
+                }
+            }
+
+
+
+
+</script>
+
+<script>
+      function submitFormAjaxCamera(position,front_back) {
+         // var ajxForm = document.getElementById("myform_camera");
+
+         console.log("front_back:");
+         console.log(front_back);
+         // var data = new FormData(ajxForm);
+         var xhr = new XMLHttpRequest();
+
+         xhr.open("GET", "/camera?camera_control=" + position + "?front_back=" + front_back); // TO MODOFY
+         xhr.send();
+         xhr.onload = function() {
+            // alert("Submitted");
+         };
+         return false;
+      }
+      function submitFormAjaxMotor(position) {
+         //var ajxForm = document.getElementById("myform_motor");
+         console.log("submitFormAjaxMotor")
+         //var data = new FormData(ajxForm);
+         var xhr = new XMLHttpRequest();
+         xhr.open("GET", "/motor?motor_control="+position);
+         xhr.send();
+         xhr.onload = function() {
+            // alert("Submitted");
+         };
+         return false;
+      }
+   </script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    function switchcamera(event){
+        // event.preventDefault();
+        // console.log(event)
+        target_id = event.target.getAttribute('id')
+        target = document.getElementById(target_id);
+        // debugger;
+        if (target.value == "front"){
+            target.value = "back"
+        //    document.getElementById("video_stream_front").hidden = true
+        //    document.getElementById("video_stream_back").hidden = false
+            var element = document.querySelector('.background-image');
+            element.style.backgroundImage = "url('http://{{back_camera_ip}}:81/stream')";
+        }
+        else if (target.value == "back"){
+            target.value = "front"
+        //    document.getElementById("video_stream_front").hidden = false
+        //    document.getElementById("video_stream_back").hidden = true
+            var element = document.querySelector('.background-image');
+            element.style.backgroundImage = "url('http://{{front_camera_ip}}:81/stream')";
+
+        }
+        console.log(target.value)
+
+    }
+
+    function switchcameramotor(event){
+        // event.preventDefault();
+        // console.log(event)
+        target_id = event.target.getAttribute('id')
+        target = document.getElementById(target_id);
+        // debugger;
+        if (target.value == "front"){
+            target.value = "back"
+
+        }
+        else if (target.value == "back"){
+            target.value = "front"
+
+        }
+        console.log(target.value)
+
+    }
+
+    front_back_camera = document.getElementById("front_back_camera");
+    front_back_camera.addEventListener('click',switchcamera)
+
+//    front_back_camera_motor = document.getElementById("front_back_control");
+//    front_back_camera_motor.addEventListener('click',switchcameramotor)
+
+
+</script>
+
+<script>
+distance_element = document.getElementById("id_distance");
+
+function autoCallComplete() {
+    // Make an asynchronous request
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/distance", true);
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var feedback = JSON.parse(xhr.responseText);
+            distance_element.innerHTML = feedback.distance;
+        }
+        // Continue polling after a delay
+        setTimeout(autoCallComplete, 500);
+    };
+
+    xhr.onerror = function () {
+        // Handle errors, such as network issues
+        // Continue polling after a delay
+        setTimeout(autoCallComplete, 500);
+    };
+
+    xhr.send();
+}
+
+// Start the polling process
+autoCallComplete();
+
+
+
+</script>
+
+</body>
+</html>
