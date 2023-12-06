@@ -203,7 +203,7 @@ class RobotControllerTankX:
 
         server.add_route("/api/settings", handler=self.app_api_settings, methods=["GET", "POST"])
         server.add_route("/api/settings/reset", handler=self.app_api_reset, methods=["GET", "POST"])
-        
+        server.add_route("/api/controls", handler=self.app_controls, methods=["GET", "POST"])
         
         
         server.set_callback(ap_catch_all)
@@ -239,12 +239,61 @@ class RobotControllerTankX:
         server.add_route("/settings", handler=self.app_settings, methods=["GET", "POST"])
 
         server.add_route("/api", handler=self.app_api, methods=["GET", "POST"])
+        server.add_route("/api/controls", handler=self.app_api_controls, methods=["GET", "POST"])
         server.add_route("/api/settings", handler=self.app_api_settings, methods=["GET", "POST"])
         server.add_route("/api/distance", handler=self.app_distance, methods=["GET"])
         server.add_route("/api/settings/reset", handler=self.app_api_reset, methods=["GET", "POST"])
         server.set_callback(self.app_catch_all)
         pass
 
+
+
+    def app_api_controls(self,request):
+        if request.method == "POST":
+            control = request.data.get('control')
+            value = request.data.get('value')
+            print(f'API call received')
+            print(f'control: {control}')
+            print(f'value: {value}')
+
+            if control == "up": # camera controls
+                self.app_api_camera_move(value)
+                pass
+
+            if control == "down": # motors controls
+                self.app_api_motor_move(value)
+                pass
+
+        return "received"
+
+    def app_api_camera_move(self,move):
+        if move == "up":
+            self.front_servo_camera_tilt.up()
+        elif move == "down":
+            self.front_servo_camera_tilt.down()
+        elif move == "left":
+            self.front_servo_camera_pan.left()
+        elif move == "right":
+            self.front_servo_camera_pan.right()
+        else:
+            self.front_servo_camera_pan.center()
+            self.front_servo_camera_tilt.center()
+        return ""
+        pass
+
+    def app_api_motor_move(self,move):
+        if move == "up":
+            self.motor.move_forward_continue(speed=int(self.SPEED))
+        elif move == "down":
+            self.motor.move_backward_continue(speed=int(self.SPEED))
+        elif move == "left":
+            self.motor.move_left_continue(speed=int(self.SPEED))
+        elif move == "right":
+            self.motor.move_right_continue(speed=int(self.SPEED))
+        else:
+            self.motor.move_stop()
+            print("stop")
+        return ""
     def app_camera_move(self,request):
         # query_string example
         # query_string: camera_control = down?front_back = front
@@ -420,114 +469,107 @@ class RobotControllerTankX:
         else:
             return "not recognised"
 
-    def app_api(self,request):
-        print("api")
-        if request.method == "POST":
-
-            print("POST")
-            # api = request.data.get("frontCameraIp")  # use this if it is from json otherwise use
-            # api = request.form.get("key") # use this if it is from form otherwise use
-            #            print("data:")
-            #            for key in request.data:
-            #                print(key)
-            #                print(request.data.get(key))
-            # add code to change the parameters
-            print(request.data)  # {'scaledY': 0.8568848, 'scaledX': 0.5155081, 'joypad': 'top'}
-
-            scaledY = request.data.get('scaledY')
-            scaledX = request.data.get('scaledX')
-            mulX = 0
-            mulY = 0
-            # print(f'{api}')
-            if abs(scaledX) > 0.7:
-                mulX = 1
-            elif abs(scaledX) > 0.3:
-                mulX = 2
-            elif abs(scaledX) > 0:
-                mulX = 3
-
-            if abs(scaledY) > 0.7:
-                mulY = 1
-            elif abs(scaledY) > 0.3:
-                mulY = 2
-            elif abs(scaledY) > 0:
-                mulY = 3
-
-            horizontal = int(20 * mulX)
-            vertical = int(20 * mulY)
-            print(f'horizontal: {horizontal}')
-            print(f'vertical: {vertical}')
-
-            joypad = request.data.get('joypad')
-
-            if joypad == 'top':  # camera servos
-
-                if scaledX > 0 and scaledY > 0:
-                    self.front_servo_camera_pan.right(input=horizontal)
-                    self.front_servo_camera_tilt.up(input=vertical)
-                    print("scaledX > 0 and scaledY > 0")
-
-                elif scaledX < 0 and scaledY > 0:
-                    self.front_servo_camera_pan.left(input=horizontal)
-                    self.front_servo_camera_tilt.up(input=vertical)
-                    print("scaledX < 0 and scaledY > 0")
-
-                elif scaledX < 0 and scaledY < 0:
-                    self.front_servo_camera_pan.left(input=horizontal)
-                    self.front_servo_camera_tilt.down(input=vertical)
-                    print("scaledX < 0 and scaledY < 0")
-
-                elif scaledX > 0 and scaledY < 0:
-                    self.front_servo_camera_pan.right(input=horizontal)
-                    self.front_servo_camera_tilt.down(input=vertical)
-                    print("scaledX > 0 and scaledY , 0")
-                else:
-                    print("pass")
-                    pass
-                # front_servo_camera_pan.center()
-                # front_servo_camera_tilt.center()
-
-            elif joypad == 'bottom':  # motors
-
-                if scaledX > 0 and scaledY > 0:
-                    self.motor.move_forward_api()
-                    self.motor.move_right_api()
-                    print("scaledX > 0 and scaledY > 0")
-
-                elif scaledX < 0 and scaledY > 0:
-                    self.motor.move_forward_api()
-                    self.motor.move_left_api()
-                    print("scaledX < 0 and scaledY > 0")
-
-                elif scaledX < 0 and scaledY < 0:
-                    self.motor.move_backward_api()
-                    self.motor.move_left_api()
-                    print("scaledX < 0 and scaledY < 0")
-
-                elif scaledX > 0 and scaledY < 0:
-                    self.motor.move_right_api()
-                    self.motor.move_backward_api()
-                    print("scaledX > 0 and scaledY , 0")
-                else:
-                    self.motor.move_stop_api()
-                    print("stop")
-                    pass
-
-                pass
-            else:
-                pass
-            return 'success'
-
-        elif request.method == "GET":
-            print("GET")
-            query_string = request.query_string  # contains all the info post api?key1=value1&key2=value2 -> key1=value1&key2=value2
-            print(f'query_string:{query_string}')
-            return 'success'
-
-        else:
-            pass
-
-        return ('check for errors')
+    # def app_api(self,request):
+    #     print("api")
+    #     if request.method == "POST":
+    #
+    #         print("POST")
+    #         print(request.data)  # {'scaledY': 0.8568848, 'scaledX': 0.5155081, 'joypad': 'top'}
+    #
+    #         scaledY = request.data.get('scaledY')
+    #         scaledX = request.data.get('scaledX')
+    #         mulX = 0
+    #         mulY = 0
+    #         # print(f'{api}')
+    #         if abs(scaledX) > 0.7:
+    #             mulX = 1
+    #         elif abs(scaledX) > 0.3:
+    #             mulX = 2
+    #         elif abs(scaledX) > 0:
+    #             mulX = 3
+    #
+    #         if abs(scaledY) > 0.7:
+    #             mulY = 1
+    #         elif abs(scaledY) > 0.3:
+    #             mulY = 2
+    #         elif abs(scaledY) > 0:
+    #             mulY = 3
+    #
+    #         horizontal = int(20 * mulX)
+    #         vertical = int(20 * mulY)
+    #         print(f'horizontal: {horizontal}')
+    #         print(f'vertical: {vertical}')
+    #
+    #         joypad = request.data.get('joypad')
+    #
+    #         if joypad == 'top':  # camera servos
+    #
+    #             if scaledX > 0 and scaledY > 0:
+    #                 self.front_servo_camera_pan.right(input=horizontal)
+    #                 self.front_servo_camera_tilt.up(input=vertical)
+    #                 print("scaledX > 0 and scaledY > 0")
+    #
+    #             elif scaledX < 0 and scaledY > 0:
+    #                 self.front_servo_camera_pan.left(input=horizontal)
+    #                 self.front_servo_camera_tilt.up(input=vertical)
+    #                 print("scaledX < 0 and scaledY > 0")
+    #
+    #             elif scaledX < 0 and scaledY < 0:
+    #                 self.front_servo_camera_pan.left(input=horizontal)
+    #                 self.front_servo_camera_tilt.down(input=vertical)
+    #                 print("scaledX < 0 and scaledY < 0")
+    #
+    #             elif scaledX > 0 and scaledY < 0:
+    #                 self.front_servo_camera_pan.right(input=horizontal)
+    #                 self.front_servo_camera_tilt.down(input=vertical)
+    #                 print("scaledX > 0 and scaledY , 0")
+    #             else:
+    #                 print("pass")
+    #                 pass
+    #             # front_servo_camera_pan.center()
+    #             # front_servo_camera_tilt.center()
+    #
+    #         elif joypad == 'bottom':  # motors
+    #
+    #             if scaledX > 0 and scaledY > 0:
+    #                 self.motor.move_forward_api()
+    #                 self.motor.move_right_api()
+    #                 print("scaledX > 0 and scaledY > 0")
+    #
+    #             elif scaledX < 0 and scaledY > 0:
+    #                 self.motor.move_forward_api()
+    #                 self.motor.move_left_api()
+    #                 print("scaledX < 0 and scaledY > 0")
+    #
+    #             elif scaledX < 0 and scaledY < 0:
+    #                 self.motor.move_backward_api()
+    #                 self.motor.move_left_api()
+    #                 print("scaledX < 0 and scaledY < 0")
+    #
+    #             elif scaledX > 0 and scaledY < 0:
+    #                 self.motor.move_right_api()
+    #                 self.motor.move_backward_api()
+    #                 print("scaledX > 0 and scaledY , 0")
+    #             else:
+    #                 self.motor.move_stop_api()
+    #                 print("stop")
+    #                 pass
+    #
+    #             pass
+    #         else:
+    #             pass
+    #         return 'success'
+    #
+    #     elif request.method == "GET":
+    #         print("GET")
+    #         query_string = request.query_string  # contains all the info post api?key1=value1&key2=value2 -> key1=value1&key2=value2
+    #         print(f'query_string:{query_string}')
+    #         return 'success'
+    #
+    #     else:
+    #         pass
+    #
+    #     return ('check for errors')
 
     def app_api_settings(self,request):
         if request.method == "GET":
