@@ -203,7 +203,7 @@ class RobotControllerTankX:
 
         server.add_route("/api/settings", handler=self.app_api_settings, methods=["GET", "POST"])
         server.add_route("/api/settings/reset", handler=self.app_api_reset, methods=["GET", "POST"])
-        server.add_route("/api/controls", handler=self.app_controls, methods=["GET", "POST"])
+        server.add_route("/api/controls", handler=self.app_api_controls, methods=["GET", "POST"])
         
         
         server.set_callback(ap_catch_all)
