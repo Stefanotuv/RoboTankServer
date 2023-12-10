@@ -212,6 +212,7 @@ class RobotControllerTankX:
         ap = access_point(self.AP_NAME, self.AP_PASSWORD)
 
         ip = ap.ifconfig()[0]
+        self.IP_ADDRESS = ip
 
         print(f'ip:{ip}')
         # self.oled.fill(0)
@@ -238,7 +239,7 @@ class RobotControllerTankX:
         server.add_route("/distance", handler=self.app_distance, methods=["GET"])
         server.add_route("/settings", handler=self.app_settings, methods=["GET", "POST"])
 
-        server.add_route("/api", handler=self.app_api, methods=["GET", "POST"])
+        # server.add_route("/api", handler=self.app_api, methods=["GET", "POST"])
         server.add_route("/api/controls", handler=self.app_api_controls, methods=["GET", "POST"])
         server.add_route("/api/settings", handler=self.app_api_settings, methods=["GET", "POST"])
         server.add_route("/api/distance", handler=self.app_distance, methods=["GET"])
@@ -267,14 +268,21 @@ class RobotControllerTankX:
         return "received"
 
     def app_api_camera_move(self,move):
-        if move == "up":
-            self.front_servo_camera_tilt.up()
-        elif move == "down":
-            self.front_servo_camera_tilt.down()
-        elif move == "left":
-            self.front_servo_camera_pan.left()
-        elif move == "right":
+        print("camera command received")
+        if move.lower() == "up":
+            # self.front_servo_camera_tilt.up() # mg90s
+            self.front_servo_camera_tilt.down() #mg996
+
+        elif move.lower() == "down":
+            # self.front_servo_camera_tilt.down() # mg90s
+            self.front_servo_camera_tilt.up() #mg996
+
+        elif move.lower() == "right":
+            self.front_servo_camera_pan.left() 
+
+        elif move.lower() == "left":
             self.front_servo_camera_pan.right()
+
         else:
             self.front_servo_camera_pan.center()
             self.front_servo_camera_tilt.center()
@@ -282,14 +290,19 @@ class RobotControllerTankX:
         pass
 
     def app_api_motor_move(self,move):
-        if move == "up":
-            self.motor.move_forward_continue(speed=int(self.SPEED))
-        elif move == "down":
-            self.motor.move_backward_continue(speed=int(self.SPEED))
-        elif move == "left":
-            self.motor.move_left_continue(speed=int(self.SPEED))
-        elif move == "right":
-            self.motor.move_right_continue(speed=int(self.SPEED))
+        print("motor command received")
+        if move.lower() == "up":
+            # self.motor.move_forward_continue(speed=int(self.SPEED))
+            self.motor.move_forward_continue()
+        elif move.lower() == "down":
+            # self.motor.move_backward_continue(speed=int(self.SPEED))
+            self.motor.move_backward_continue()
+        elif move.lower() == "left":
+            # self.motor.move_left_continue(speed=int(self.SPEED))
+            self.motor.move_left_continue()
+        elif move.lower() == "right":
+            # self.motor.move_right_continue(speed=int(self.SPEED))
+            self.motor.move_right_continue()
         else:
             self.motor.move_stop()
             print("stop")
@@ -307,22 +320,26 @@ class RobotControllerTankX:
         if camera_control == "up":
             # front_servo_camera_tilt.up() if front_back == "front" else back_servo_camera_tilt.up()
             if front_back == "front":
-                self.front_servo_camera_tilt.up()
+                # self.front_servo_camera_tilt.up()
+                self.front_servo_camera_tilt.down()
             else:
                 self.back_servo_camera_tilt.up()
         elif camera_control == "down":
             if front_back == "front":
-                self.front_servo_camera_tilt.down()
+                # self.front_servo_camera_tilt.down()
+                self.front_servo_camera_tilt.up()
             else:
                 self.back_servo_camera_tilt.down()
         elif camera_control == "left":
             if front_back == "front":
-                self.front_servo_camera_pan.left()
+                # self.front_servo_camera_pan.left()
+                self.front_servo_camera_pan.right()
             else:
                 self.back_servo_camera_pan.left()
         elif camera_control == "right":
             if front_back == "front":
-                self.front_servo_camera_pan.right()
+                # self.front_servo_camera_pan.right()
+                self.front_servo_camera_pan.left()
             else:
                 self.back_servo_camera_pan.right()
         elif camera_control == "center":
@@ -352,13 +369,17 @@ class RobotControllerTankX:
         elif motor_control == "right":
             self.motor.move_right()
         elif motor_control == "up_continue":
-            self.motor.move_forward_continue(speed=int(self.SPEED))
+            self.motor.move_forward_continue(speed=int(self.SPEED) / 100)
+
         elif motor_control == "down_continue":
-            self.motor.move_backward_continue(speed=int(self.SPEED))
+            self.motor.move_backward_continue(speed=int(self.SPEED) / 100)
+
         elif motor_control == "left_continue":
-            self.motor.move_left_continue(speed=int(self.SPEED))
+            self.motor.move_left_continue(speed=int(self.SPEED)/100)
+
         elif motor_control == "right_continue":
-            self.motor.move_right_continue(speed=int(self.SPEED))
+            self.motor.move_right_continue(speed=int(self.SPEED)/100)
+
         else:
             self.motor.move_stop()
             print("stop")
@@ -457,17 +478,21 @@ class RobotControllerTankX:
 
 
     def app_distance(self,request):
-        print("api distance call")
+        # print("api distance call")
         if request.method == "GET":
-            print("get call")
+            # print("get call")
             distance = ultra()
-            print(f'distance: {distance}')
+            # print(f'distance: {distance}')
             string = {'distance': distance.split(' ')[0]}
-            print(f'string: {string}')
+            # print(f'string: {string}')
             value = ujson.dumps(string)
             return value
         else:
             return "not recognised"
+
+
+    # old server side controls designed for the old implementation of the joypad controls.
+
 
     # def app_api(self,request):
     #     print("api")
@@ -635,6 +660,7 @@ class RobotControllerTankX:
                 self.AP_mode()
             else:
                 print(f'mode wifi launched')
+
                 self.WiFi_mode(ssid=config["ssid"], password=config["password"])
         except Exception as e:
             # If no valid configuration is found, or there's an exception, start in AP mode.
@@ -645,6 +671,7 @@ class RobotControllerTankX:
     def AP_mode(self):
         # Start in Access Point (AP) mode
         self.setup_mode()
+        self.initRoboTank()
         server.run()
 
     def WiFi_mode(self, ssid, password):
@@ -666,4 +693,27 @@ class RobotControllerTankX:
 #             self.oled.text(ip_address, 0, 15)
 #             self.oled.show()
             self.application_mode()
+            self.initRoboTank()
             server.run()
+
+    def initRoboTank(self):
+        try:
+            # First check the configuration file for the mode to start
+            os.stat(self.CONFIG_FILE)
+            with open(self.CONFIG_FILE) as f:
+                print('file opened')
+                config = json.load(f)
+                print('file read')
+                ap_wifi = config["ap_wifi"]
+                print(f'ap_wifi: {ap_wifi}')
+                f.close()
+
+            self.SPEED = config['speed']
+            self.BACK_CAMERA_IP = config['back_camera_ip']
+            self.FRONT_CAMERA_IP = config['front_camera_ip']
+
+        except Exception as e:
+            # If no valid configuration is found, or there's an exception, start in AP mode.
+            print(f'mode ap launched by exception')
+            print(f'exception:{e}')
+            pass

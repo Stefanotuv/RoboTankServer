@@ -260,9 +260,9 @@ input:checked + .slider:before {
             <p></p>
             <div class="arrow" id="motor_up"></div>
             <p></p>
-            <div class="" id="motor_left"></div>
+            <div class="" id=""></div>
             <p id="motor_stop" class="recenter" style="justify-content: center;display: flex;">STOP</p>
-            <div class="" id="motor_right"></div>
+            <div class="" id=""></div>
             <p></p>
             <div class="arrow" id="motor_down"></div>
             <p></p></div>
@@ -332,7 +332,7 @@ input:checked + .slider:before {
                 direction = String(event.target.getAttribute('id')).split("_")[1]
 
                 if (event.type == 'mousedown') {
-
+                    debugger
                     if (camera_motor == 'camera') {
                         console.log("press mousedown")
                         console.log("if camera")
