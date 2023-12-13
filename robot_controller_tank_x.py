@@ -57,8 +57,8 @@ class RobotControllerTankX:
         self.front_servo_camera_pan = Servo(pin=20)
 
         # back (this may not be installed)
-        self.back_servo_camera_tilt = Servo(pin=18)
-        self.back_servo_camera_pan = Servo(pin=19)
+        self.back_servo_camera_tilt = Servo(pin=19)
+        self.back_servo_camera_pan = Servo(pin=20)
 
     def cleanup(self):
         # Cleanup code goes here
